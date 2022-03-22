@@ -53,14 +53,19 @@ read_arguments() {
     done
 }
 
-printAllPodLogsInNamespace() {
-    echo "================================ $1 Namespace Pod Logs =================================="
+captureAllPodLogsInNamespace() {
+    echo "Retrieving Pod Logs For Namespace $1 ..."
     oc get po -n $1 -o name | \
     while IFS= read -r po; do \
-        echo "================================ $1 Namespace Pod Log - ${po#*/} =================================="
-        oc logs $po -n $1
+        if [[ -d "${LOG_DIR}" ]]; then
+            LOG_FILE=$LOG_DIR/$1-$po.log
+            echo "Processing $LOG_FILE..."
+            oc logs $po -n $1 > $LOG_FILE
+        else
+            oc logs $po -n $1
+        fi
     done
-    echo "================================ End of $1 Namespace Pod Logs =================================="
+    echo "Finished retrieving Pod Logs For Namespace $1 ..."
 }
 
 wait_until_is_installed() {
@@ -86,8 +91,8 @@ wait_until_is_installed() {
            oc get subscription ${SUBSCRIPTION_NAME} -n ${NAMESPACE} -o yaml
            echo "================================ InstallPlans =================================="
            oc get installplans -n ${NAMESPACE} -o yaml
-           printAllPodLogsInNamespace $OLM_NS
-           printAllPodLogsInNamespace $NAMESPACE
+           captureAllPodLogsInNamespace $OLM_NS
+           captureAllPodLogsInNamespace $NAMESPACE
            exit 1
         fi
         echo "$(( NEXT_WAIT_TIME++ )). attempt (out of ${MAX_NUM_ATTEMPTS}) of waiting for CRD ${EXPECT_CRD} to be available in the cluster"
@@ -98,4 +103,10 @@ wait_until_is_installed() {
 set -e
 
 read_arguments $@
+
+if [[ -d "${ARTIFACT_DIR}" ]]; then
+   LOG_DIR=$ARTIFACT_DIR/logs
+   mkdir -p $LOG_DIR
+fi
+
 wait_until_is_installed
