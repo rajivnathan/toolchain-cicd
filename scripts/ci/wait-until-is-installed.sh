@@ -82,6 +82,10 @@ wait_until_is_installed() {
            printAllPodLogsInNamespace $NAMESPACE
            exit 1
         fi
+        if [[ ${NEXT_WAIT_TIME} -eq 30 ]] && [[ -n ${ARTIFACT_DIR} ]]; then
+           mkdir -p ${ARTIFACT_DIR}/bundle-mustgather
+           oc adm must-gather --dest-dir=${ARTIFACT_DIR}/bundle-mustgather
+        fi
         echo "$(( NEXT_WAIT_TIME++ )). attempt (out of 100) of waiting for CRD ${EXPECT_CRD} to be available in the cluster"
         sleep 1
     done
