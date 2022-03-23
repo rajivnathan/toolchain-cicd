@@ -55,10 +55,11 @@ read_arguments() {
 
 captureAllPodLogsInNamespace() {
     echo "Retrieving Pod Logs For Namespace $1 ..."
-    oc get po -n $1 -o name | \
+    oc get po -n $1 --no-headers -o custom-columns=":metadata.name" | \
     while IFS= read -r po; do \
         if [[ -d "${LOG_DIR}" ]]; then
-            LOG_FILE=$LOG_DIR/$1-$po.log
+            mkdir -p $LOG_DIR/$1
+            LOG_FILE=$LOG_DIR/$1/$po.log
             echo "Processing $LOG_FILE..."
             oc logs $po -n $1 > $LOG_FILE
         else
