@@ -76,8 +76,8 @@ wait_until_is_installed() {
     MAX_NUM_ATTEMPTS=100
     SLEEP_TIME=1
     if [[ -n "${CI}${CLONEREFS_OPTIONS}" ]]; then
-        MAX_NUM_ATTEMPTS=2
-        SLEEP_TIME=3
+        MAX_NUM_ATTEMPTS=30
+        SLEEP_TIME=1
     fi
 
     while [[ -z `oc get crd | grep ${EXPECT_CRD} || true` ]]; do
