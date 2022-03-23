@@ -76,7 +76,7 @@ wait_until_is_installed() {
     MAX_NUM_ATTEMPTS=100
     SLEEP_TIME=1
     if [[ -n "${CI}${CLONEREFS_OPTIONS}" ]]; then
-        MAX_NUM_ATTEMPTS=200
+        MAX_NUM_ATTEMPTS=2
         SLEEP_TIME=3
     fi
 
